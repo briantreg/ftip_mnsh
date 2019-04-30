@@ -33,9 +33,10 @@ if 'dfAllGamesPlayers_read' in locals():
     scraped_ids = list(dfAllGamesPlayers_read['fw_game_id'].astype('int'))
     game_ids = [x for x in game_ids if x not in scraped_ids]
 
-    
 for fw_game_id in game_ids:
-        
+    
+    print(fw_game_id)
+    
     aflGameURL = 'https://www.footywire.com/afl/footy/ft_match_statistics?mid=' + str(fw_game_id)
     
     ###For each game get player data
@@ -91,7 +92,22 @@ for fw_game_id in game_ids:
     dfAllPlayersLink = dfAllPlayersLink.drop_duplicates()
     dfAllGamesPlayers = dfAllGamesPlayers.drop_duplicates()
     gc.collect()
-    
+
+dfAllGamesPlayers = dfAllGamesPlayers[['year','round_char','season_round','fw_game_id','fw_player_id','team']]
+if os.path.isfile('./data/dfAllGamesPlayers.pkl'):
+    dfAllGamesPlayers_read = pd.read_pickle('data/dfAllGamesPlayers.pkl')
+    dfAllGamesPlayers_read  = pd.concat([dfAllGamesPlayers_read, dfAllGamesPlayers])
+    dfAllGamesPlayers_read  = dfAllGamesPlayers_read .drop_duplicates()
+pd.to_pickle(dfAllGamesPlayers_read , "data/dfAllGamesPlayers.pkl")
+del dfAllGamesPlayers_read 
+
+if os.path.isfile('./data/dfAllPlayersLink.pkl'):
+    dfAllPlayersLink_read = pd.read_pickle('data/dfAllPlayersLink.pkl')
+    dfAllPlayersLink_read = pd.concat([dfAllPlayersLink_read, dfAllPlayersLink])
+    dfAllPlayersLink_read = dfAllPlayersLink_read.drop_duplicates()
+pd.to_pickle(dfAllPlayersLink_read, 'data/dfAllPlayersLink.pkl')   
+del dfAllPlayersLink_read
+
 ##########Scraping Fantasy Values
 for i in range(len(dfAllPlayersLink)):
     PlayerLink = dfAllPlayersLink.iloc[i]
@@ -188,6 +204,9 @@ for i in range(len(dfAllPlayersLink)):
         dfAllFantasyScores = tablePlayerFantasyScores
     else: 
         dfAllFantasyScores = pd.concat([dfAllFantasyScores , tablePlayerFantasyScores])
+    dfAllFantasyScores = dfAllFantasyScores.drop_duplicates()
+    gc.collect()
+
     
 dfAllFantasyScores['SupercoachPrice'] = utlScrape.cleanPrices(dfAllFantasyScores['SupercoachPrice'])
 dfAllFantasyScores['AFLFantasyPrice'] = utlScrape.cleanPrices(dfAllFantasyScores['AFLFantasyPrice'])
@@ -195,23 +214,9 @@ dfAllFantasyScores['AFLFantasyPrice'] = utlScrape.cleanPrices(dfAllFantasyScores
 dfAllFantasyScores = dfAllFantasyScores[['year','Round','SupercoachPrice','AFLFantasyPrice','fw_player_id']]
 dfAllFantasyScores.columns = ['season_round','year','SupercoachPrice','AFLFantasyPrice','fw_player_id']
 dfAllFantasyScores['season_round'] = dfAllFantasyScores['season_round'].astype('int')
-dfAllGamesPlayers = dfAllGamesPlayers[['year','round_char','season_round','fw_game_id','fw_player_id','team']]
-
 
 if os.path.isfile('./data/dfAllFantasyScores.pkl'):
     dfAllFantasyScores_read = pd.read_pickle('data/dfAllFantasyScores.pkl')
     dfAllFantasyScores = pd.concat([dfAllFantasyScores_read, dfAllFantasyScores])
-    dfAllFantasyScores = dfAllFantasyScores.drop_duplicates
-dfAllFantasyScores.to_pickle('data/dfAllFantasyScores.pkl')
-
-if os.path.isfile('./data/dfAllGamesPlayers.pkl'):
-    dfAllGamesPlayers_read = pd.read_pickle('data/dfAllGamesPlayers.pkl')
-    dfAllGamesPlayers = pd.concat([dfAllGamesPlayers_read, dfAllGamesPlayers])
-    dfAllGamesPlayers = dfAllGamesPlayers.drop_duplicates   
-dfAllGamesPlayers.to_pickle('data/dfAllGamesPlayers.pkl')   
-
-if os.path.isfile('./data/dfAllPlayersLink.pkl'):
-    dfAllPlayersLink_read = pd.read_pickle('data/dfAllPlayersLink.pkl')
-    dfAllPlayersLink = pd.concat([dfAllPlayersLink_read, dfAllPlayersLink])
-    dfAllPlayersLink = dfAllPlayersLink.drop_duplicates
-dfAllPlayersLink.to_pickle('data/dfAllPlayersLink.pkl')   
+    dfAllFantasyScores = dfAllFantasyScores.drop_duplicates()
+pd.to_pickle(dfAllFantasyScores, 'data/dfAllFantasyScores.pkl')
