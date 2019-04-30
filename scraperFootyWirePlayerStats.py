@@ -1,4 +1,4 @@
-year_start = 2019
+year_start = 2013
 year_end = 2019
 
 import urllib.request
@@ -8,6 +8,7 @@ import pandas as pd
 import re
 import os
 #import sys
+import gc
 
 import utilities.utilitiesScrape as utlScrape
 
@@ -32,7 +33,7 @@ if 'dfAllGamesPlayers_read' in locals():
     scraped_ids = list(dfAllGamesPlayers_read['fw_game_id'].astype('int'))
     game_ids = [x for x in game_ids if x not in scraped_ids]
 
-
+    
 for fw_game_id in game_ids:
         
     aflGameURL = 'https://www.footywire.com/afl/footy/ft_match_statistics?mid=' + str(fw_game_id)
@@ -87,9 +88,10 @@ for fw_game_id in game_ids:
         dfAllPlayersLink = tablePlayerLink
     else: 
         dfAllPlayersLink = pd.concat([dfAllPlayersLink, tablePlayerLink])
- 
-dfAllPlayersLink = dfAllPlayersLink.drop_duplicates()
-
+    dfAllPlayersLink = dfAllPlayersLink.drop_duplicates()
+    dfAllGamesPlayers = dfAllGamesPlayers.drop_duplicates()
+    gc.collect()
+    
 ##########Scraping Fantasy Values
 for i in range(len(dfAllPlayersLink)):
     PlayerLink = dfAllPlayersLink.iloc[i]
