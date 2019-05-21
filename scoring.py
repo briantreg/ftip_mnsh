@@ -1,4 +1,7 @@
 
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 import pickle
 import datetime as dt
 import utilities.utilities as utl
@@ -8,16 +11,54 @@ import utilities.utilitiesElo as eloUtl
 # =============================================================================
 # Add teams + round num
 # =============================================================================
-teams = ['Brisbane', 'North Melbourne','West Coast','GWS','Melbourne','Richmond',  'Western Bulldogs', 'Adelaide', 'Hawthorn']
-opponents = ['Collingwood', 'Essendon', 'Port Adelaide','Fremantle', 'St Kilda' ,   'Sydney', 'Carlton',  'Gold Coast', 'Geelong']
-round_n = 2
+allData = pd.read_pickle('afl_DF.pkl')
 
-year = 2019
+maxGameDate = max(allData.date)
+
+currentYear = max(allData[allData.date == maxGameDate].year)
+currentRound = max(allData[allData.date == maxGameDate].season_round) + 1
+
+del allData, maxGameDate 
+
+teamsWiki = {'Adelaide':'Adelaide',
+        'Geelong':'Geelong',
+        'Melbourne':'Melbourne',
+        'Essendon':'Essendon',
+        'Carlton':'Carlton',
+        'Sydney':'Sydney',
+        'Greater Western Sydney':'GWS',
+        'Richmond':'Richmond',
+        'Brisbane Lions':'Brisbane',
+        'Port Adelaide': 'Port Adelaide',
+        'Collingwood':'Collingwood',
+        'West Coast': 'West Coast',
+        'Western Bulldogs':'Western Bulldogs',
+        'Gold Coast': 'Gold Coast',
+        'Hawthorn':'Hawthorn',
+        'North Melbourne': 'North Melbourne',
+        'Fremantle':'Fremantle',
+        'St Kilda': 'St Kilda'}
+
+pageWiki = requests.get('https://en.wikipedia.org/wiki/2019_AFL_season')
+
+soupWiki = BeautifulSoup(pageWiki.text, 'html.parser')
+
+tablesWiki = soupWiki.find_all('table')  
+
+# Create scoring frame
+
+roundFixture = pd.read_html(str(tablesWiki))[currentRound + 1]
+roundFixture = roundFixture[[1,3]].dropna()
+roundFixture.columns = ['teams','opponents']
+
+teams = roundFixture.teams.map(teamsWiki)
+opponents = roundFixture.opponents.map(teamsWiki)
+
 games = range(1,len(teams)+1)
 # =============================================================================
 # Create a new round to add all the metrics to
 # =============================================================================
-afl_NEWentry = utl.createScoringData(teams, opponents, games, round_n, year)
+afl_NEWentry = utl.createScoringData(teams, opponents, games, currentRound, currentYear)
 # =============================================================================
 # Run the averaging to populate the new round
 # =============================================================================
