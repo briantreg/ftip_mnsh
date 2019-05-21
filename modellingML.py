@@ -16,7 +16,7 @@ svm_param_set = [{'C':[0.00001, 0.0001, 0.001, 0.1, 0.5, 1, 2, 5], 'kernel': ['l
 SVC_clf = mlearn.trainSVC(X_train_select, Y_train, svm_param_set , score, sample_weights)
 
 pickle.dump(SVC_clf, open("SVC_clf.pkl", 'wb'))
-
+SVC_clf = pickle.load(open("SVC_clf.pkl", 'rb')) 
 
 # =============================================================================
 # 
@@ -32,8 +32,9 @@ rf_param_set = {
 RF_clf = mlearn.trainRandRF(X_train_select, Y_train, rf_param_set , score, sample_weights, 200)
 
 pickle.dump(RF_clf, open("RF_clf.pkl", 'wb'))
-
-
+RF_clf = pickle.load(open("RF_clf.pkl", 'rb')) 
+RF_clf.best_estimator_.feature_importances_
+list(X_train_select.columns[])
 # =============================================================================
 # 
 # =============================================================================
