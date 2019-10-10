@@ -1,7 +1,7 @@
 #pip install webdriver-manager
 #pip install selenium 
 alias = 'BrianTreg_T'
-password = 'MOwRepru27'
+password = ''
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
